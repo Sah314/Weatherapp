@@ -19,8 +19,8 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.ViewHolder> {
-    private Context context;
-    private ArrayList<RVModel> RVModelArrayList;
+    private final Context context;
+    private final ArrayList<RVModel> RVModelArrayList;
 
 
     public WeatherAdapter(Context context, ArrayList<RVModel> RVModelArrayList) {
@@ -33,7 +33,7 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.ViewHold
     @Override
     public WeatherAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view  = LayoutInflater.from(context).inflate(R.layout.layoutweather ,parent, false);
-    return new ViewHolder(view);}
+        return new ViewHolder(view);}
 
     @Override
     public void onBindViewHolder(@NonNull WeatherAdapter.ViewHolder holder, int position) {
@@ -45,7 +45,7 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.ViewHold
         SimpleDateFormat output = new SimpleDateFormat("hh:mm aa");
         try{
             Date t = input.parse(model.getTime());
-        holder.TVTime.setText(output.format(t));
+            holder.TVTime.setText(output.format(t));
         } catch (ParseException e) {
             e.printStackTrace();
         }

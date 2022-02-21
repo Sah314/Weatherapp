@@ -90,28 +90,28 @@ public class MainActivity extends AppCompatActivity {
         weatherAdapter = new WeatherAdapter(this, RVModelArrayList);
         RVWeather.setAdapter(weatherAdapter);
         LocManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_code);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+            Location location = LocManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            CityName = getCityName(location.getLongitude() , location.getLatitude());
+            getWeatherInfo(CityName);
+
+        }
+        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_code);
+
+        IVSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String city = Objects.requireNonNull(ETCity.getText()).toString();
+                if(city.isEmpty()){
+                    Toast.makeText(MainActivity.this , "Please enter city Name" , Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    TVCityName.setText(CityName);
+                    getWeatherInfo(city);
+                }
+            }
+        });
     }
-
-    Location location = LocManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-    CityName = getCityName(location.getLongitude() , location.getLatitude());
-    getWeatherInfo(CityName);
-
-    IVSearch.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            String city = ETCity.getText().toString();
-            if(city.isEmpty()){
-                Toast.makeText(MainActivity.this , "Please enter city Name" , Toast.LENGTH_SHORT).show();
-            }
-            else{
-                TVCityName.setText(CityName);
-                getWeatherInfo(city);
-            }
-        }
-    });
-        }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -127,10 +127,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     private String getCityName(double Longitude , double Latitude){
-    String cityname = "Not Found";
-            Geocoder gc = new Geocoder(getBaseContext() , Locale.getDefault());
-            try {
-                List<Address> addresses =  gc.getFromLocation(Latitude , Longitude , 10);
+        String cityname = "Not Found";
+        Geocoder gc = new Geocoder(getBaseContext() , Locale.getDefault());
+        try {
+            List<Address> addresses =  gc.getFromLocation(Latitude , Longitude , 10);
             for(Address adr: addresses){
                 if(adr!=null){
                     String city = adr.getLocality();
@@ -142,21 +142,21 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }
-            }
-            catch (IOException e){
-            e.printStackTrace();
-            }
-            return cityname;
         }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+        return cityname;
+    }
 
     private void getWeatherInfo(String CityName){
         String APIurl = "http://api.weatherapi.com/v1/forecast.json?key=0d81570049a04fbaabf43058221902&q="+CityName+"&days=1&aqi=yes&alerts=yes";
         TVCityName.setText(CityName);
         RequestQueue reqqueue = Volley.newRequestQueue(MainActivity.this);
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET ,APIurl ,null , response -> {
-        PBLoading.setVisibility(View.GONE);
-        RLHome.setVisibility(View.VISIBLE);
-        RVModelArrayList.clear();
+            PBLoading.setVisibility(View.GONE);
+            RLHome.setVisibility(View.VISIBLE);
+            RVModelArrayList.clear();
 
             try {
                 String temp = response.getJSONObject("current").getString("temp_c");
